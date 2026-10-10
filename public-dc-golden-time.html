@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>숫자로 찾는 DC 전환 골든타임</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#14213D; --navy2:#1E2B4D;
+    --gold:#FBE7A3; --gold-ink:#8A6512; --gold-ink2:#5C4A12; --gold-line:#C6982E;
+    --coral:#E2604A;
+    --paper:#FFFFFF; --card:#F1F3FA; --line:#E4E7F1;
+    --ink:#1B2233; --ink-soft:#5B6478; --ink-faint:#9199AA;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans KR',sans-serif;}
+  .wrap{max-width:1220px;margin:0 auto;padding:44px 40px 80px;}
+  .eyebrow{font-size:15px;color:var(--coral);font-weight:700;margin:0 0 6px;}
+  .brand-badge{display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--navy); background:var(--card); border:1px solid var(--line); border-radius:20px; padding:5px 14px; margin-bottom:14px;}
+  .tagline{font-size:34px; font-weight:800; color:var(--navy); margin:0 0 6px; letter-spacing:-0.5px;}
+  .tagline b{color:var(--coral);}
+  .sys-name{font-size:16px; font-weight:600; color:var(--ink-soft); margin:0 0 20px;}
+  h1{font-size:28px;font-weight:800;color:var(--navy);margin:0 0 18px;}
+  .divider{border:none;border-top:2px solid var(--line);margin:0 0 24px;}
+
+  .setup{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;}
+  .field{flex:1;min-width:170px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;}
+  .field label{display:block;font-size:12px;color:var(--ink-faint);margin-bottom:6px;}
+  .field select{width:100%;border:none;font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:700;color:var(--navy);background:transparent;padding:0;}
+  .field select:focus{outline:none;}
+  .field .row{display:flex;align-items:baseline;gap:6px;}
+  .field .row input{border:none;font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:700;color:var(--navy);background:transparent;padding:0;width:52px;}
+  .field .row input:focus{outline:none;}
+  .field .row span{font-size:14px;color:var(--ink-soft);}
+  .field .row .sep{color:var(--ink-faint);}
+
+  .assump-note{font-size:12.5px;color:var(--ink-faint);margin:0 0 16px; line-height:1.6;}
+
+  .tabs{display:flex;gap:10px;margin-bottom:18px;}
+  .tab{font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:700;color:var(--ink-soft);background:var(--card);border:none;border-radius:20px;padding:10px 20px;cursor:pointer;}
+  .tab.active{background:var(--navy);color:#FFFFFF;}
+
+  .panels{display:flex;gap:24px;align-items:flex-start;}
+  .panel{flex:1;display:none;flex-direction:column;gap:14px;background:var(--card);border-radius:16px;padding:24px;}
+  .panel.show{display:flex;}
+  .panel-label{display:inline-block;font-size:14px;font-weight:700;color:var(--ink-soft);background:#FFFFFF;border-radius:20px;padding:6px 16px;align-self:flex-start;}
+
+  .mini-grid{display:flex;gap:10px;flex-wrap:wrap;}
+  .mini{flex:1;min-width:130px;background:#FFFFFF;border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
+  .mini .k{font-size:12px;color:var(--ink-faint);margin-bottom:4px;}
+  .mini .v{font-size:17px;font-weight:700;color:var(--navy);}
+
+  .assump-grid{display:flex;gap:10px;flex-wrap:wrap;}
+  .assump{flex:1;min-width:150px;background:#FFFFFF;border:1px solid var(--line);border-radius:10px;padding:10px 14px;}
+  .assump label{display:block;font-size:11.5px;color:var(--ink-faint);margin-bottom:4px;}
+  .assump .row{display:flex;align-items:baseline;gap:4px;}
+  .assump input{border:none;font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:700;color:var(--navy);background:transparent;width:50px;padding:0;}
+  .assump input:focus{outline:none;}
+  .assump span{font-size:13px;color:var(--ink-soft);}
+
+  .script-box{background:var(--gold);border:1px solid #E9C766;border-radius:10px;padding:16px 18px;}
+  .script-box .lbl{font-size:15px;font-weight:800;color:var(--gold-ink);margin-bottom:8px;}
+  .script-box p{font-size:14px;line-height:1.7;color:var(--gold-ink2);margin:0 0 10px;}
+  .script-box p:last-child{margin-bottom:0;}
+
+  .assump-summary{font-size:13px;color:var(--ink-soft);background:#FFFFFF;border:1px solid var(--line);border-radius:10px;padding:12px 16px;line-height:1.7;}
+  .assump-summary b{color:var(--navy);}
+
+  .compare-row{display:flex;gap:12px;}
+  .compare-card{flex:1;background:#FFFFFF;border:1px solid var(--line);border-radius:10px;padding:16px;text-align:center;}
+  .compare-card.hi{background:var(--navy);border-color:var(--navy);}
+  .compare-card .k{font-size:13px;color:var(--ink-faint);margin-bottom:6px;}
+  .compare-card.hi .k{color:var(--gold);}
+  .compare-card .v{font-size:22px;font-weight:800;color:var(--navy);}
+  .compare-card.hi .v{color:#FFFFFF;}
+
+  .chart-card{background:#FFFFFF;border:1px solid var(--line);border-radius:10px;padding:18px;}
+  .chart-title{font-size:13px;font-weight:700;color:var(--ink-soft);margin:0 0 8px;}
+  svg.chart{width:100%;height:260px;display:block;}
+  .legend{display:flex;gap:20px;justify-content:center;margin-top:4px;}
+  .legend .item{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-soft);}
+  .legend .sw{width:14px;height:4px;border-radius:2px;}
+
+  .bar-chart{display:flex;flex-direction:column;gap:14px;}
+  .bar-row{display:flex;align-items:center;gap:12px;}
+  .bar-row .bar-label{width:110px;font-size:13px;color:var(--ink-soft);flex-shrink:0;}
+  .bar-track{flex:1;background:#EDEFF6;border-radius:8px;height:28px;position:relative;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;}
+  .bar-fill span{font-size:13px;font-weight:800;color:#FFFFFF;}
+
+  .delta-strip{margin-top:4px;background:var(--gold);border-radius:10px;padding:14px 20px;text-align:center;}
+  .delta-strip p{font-size:15.5px;font-weight:800;color:var(--gold-ink);margin:0;}
+
+  .wait-card{background:#FFF6DC;border:1.5px solid var(--gold-line);border-radius:10px;padding:14px 18px;display:flex;flex-direction:column;gap:4px;}
+  .wait-card .lbl{font-size:13px;font-weight:800;color:var(--gold-ink);display:flex;align-items:center;gap:6px;}
+  .wait-card .v{font-size:26px;font-weight:800;color:var(--navy);}
+  .wait-card .sub{font-size:12px;color:var(--gold-ink2);line-height:1.5;margin:0;}
+
+  .section-title{font-size:20px;font-weight:800;color:var(--navy);margin:36px 0 14px;}
+  .faq{display:flex;flex-direction:column;gap:10px;}
+  .faq-item{border:1px solid var(--line);border-radius:12px;padding:16px 20px;background:#FFFFFF;}
+  .faq-q{font-size:15.5px;font-weight:700;color:var(--navy);margin:0 0 8px;}
+  .faq-a{font-size:14px;line-height:1.7;color:var(--ink-soft);margin:0;}
+
+  .disclaimer{margin-top:24px;font-size:12px;line-height:1.7;color:var(--ink-faint);}
+
+  @media print {
+    .setup, .tabs, .assump-note, #panelManager, .section-title, .faq, .disclaimer { display:none !important; }
+    .panel { display: none !important; }
+    #panelConsumer { display: flex !important; }
+    #panelConsumer button { display:none !important; }
+    .eyebrow, .tagline, .sys-name { display:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="brand-badge">📈 한국투자증권 퇴직연금</p>
+  <h1 class="tagline">숫자로 찾는 DC 전환 골든타임</h1>
+  <p class="sys-name">계산 시스템</p>
+  <hr class="divider">
+
+  <div class="setup">
+    <div class="field">
+      <label>담당 공공기관</label>
+      <select id="company" onchange="onCompanyChange()"></select>
+    </div>
+    <div class="field">
+      <label>나이 / 근속연수</label>
+      <div class="row">
+        <input type="number" id="age" value="45" oninput="calculate()"><span>세</span>
+        <span class="sep">·</span>
+        <input type="number" id="service" value="20" oninput="calculate()"><span>년</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>임금피크제 도입 나이</label>
+      <div class="row"><input type="number" id="peakAge" value="55" oninput="calculate()"><span>세</span></div>
+    </div>
+    <div class="field">
+      <label>현재 월 평균임금(만원)</label>
+      <div class="row"><input type="number" id="wage" value="611" oninput="calculate()" style="width:70px"></div>
+    </div>
+  </div>
+  <p class="assump-note">임금피크제 도입 시점을 넘어서까지 DB에 남아있는 경우는 없다고 전제합니다(늦어도 그 시점엔 DC로 전환). 즉 비교 대상은 "지금 바로 DC 전환"과 "임금피크 시작 시점에 DC 전환" 두 가지입니다.</p>
+
+  <div class="tabs">
+    <button class="tab active" id="tabManager" onclick="setTab('manager')">자세히 보기</button>
+    <button class="tab" id="tabConsumer" onclick="setTab('consumer')">간단히 보기</button>
+    <button id="restoreBtn" onclick="setTab('manager')" style="display:none; margin-left:0; background:transparent; border:none; color:var(--ink-faint); font-size:20px; cursor:pointer; padding:6px 10px;" title="자세히 보기로 돌아가기">:</button>
+  </div>
+
+  <div class="panels">
+    <div class="panel show" id="panelManager">
+      <p class="panel-label">자세히 보기</p>
+      <div class="mini-grid">
+        <div class="mini"><div class="k">나이 / 근속</div><div class="v" id="mgrAgeService">-</div></div>
+        <div class="mini"><div class="k">당해(2025) 등급</div><div class="v" id="mgrGradeCur">-</div></div>
+        <div class="mini"><div class="k">5년 평균 등급</div><div class="v" id="mgrGradeAvg">-</div></div>
+      </div>
+      <div id="gradeStatusBadge" style="display:inline-block; align-self:flex-start; font-size:13px; font-weight:700; border-radius:20px; padding:6px 16px;"></div>
+      <div class="wait-card" id="waitCardManager" style="display:none">
+        <div class="lbl">✅ 지금 전환해야 받을 수 있는 올해 등급 프리미엄</div>
+        <div class="v" id="waitLossManager">-</div>
+        <p class="sub" id="waitSubManager"></p>
+      </div>
+      <p style="font-size:12px; color:var(--ink-faint); margin:0">평균등급 환산 기준: S=6점 · A=5점 · B=4점 · C=3점 · D=2점 · E=1점</p>
+      <p style="font-size:13px; color:var(--ink-faint); margin:0">아래 가정치는 선택한 기관 기준으로 자동 설정되며, 직접 수정할 수 있습니다.</p>
+      <div class="assump-grid">
+        <div class="assump" style="min-width:220px">
+          <label>기본급 임금상승률</label>
+          <div class="row"><input type="number" id="growthInput" step="0.1" oninput="onAssumpChange()"><span>%</span></div>
+          <p style="font-size:11px; color:var(--ink-faint); margin:6px 0 0; line-height:1.5">기본급은 이 비율로 자체 성장하고, 나머지 항목(고정·실적수당, 복리후생비, 성과상여금)은 각각 5년 평균 수준으로 유지된다고 가정합니다. 등급과 무관한 구조적 추세치이며(건강보험심사평가원 5개년 기본급 CAGR 3.47% 기준), 기관마다 다를 수 있어 직접 수정할 수 있습니다.</p>
+        </div>
+        <div class="assump" style="min-width:220px">
+          <label>DC 예상 운용수익률</label>
+          <div class="row"><input type="number" id="dcReturnInput" value="4.31" step="0.1" oninput="onAssumpChange()"><span>%</span></div>
+          <p style="font-size:11px; color:var(--ink-faint); margin:6px 0 0; line-height:1.5">한투 DC 적립금 구성(원리금비보장 약 75%, 원리금보장 약 25%)의 10년 장기수익률을 적립금 비중으로 가중평균한 값(2026년 2분기 공시 기준). 직접 수정 가능합니다.</p>
+        </div>
+      </div>
+      <div class="script-box">
+        <div class="lbl">💬 상담 멘트 추천</div>
+        <div id="scriptText"><p>회사를 선택하면 상담 멘트가 자동 생성됩니다.</p></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panelConsumer">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <p class="panel-label" style="margin:0;">간단히 보기</p>
+        <button onclick="window.print()" style="font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:700; color:var(--navy); background:#FFFFFF; border:1px solid var(--line); border-radius:20px; padding:8px 16px; cursor:pointer;">🖨️ 출력하기</button>
+      </div>
+      <div class="assump-summary" id="assumpSummary"></div>
+      <div class="compare-row">
+        <div class="compare-card"><div class="k">임금피크 시작 시 전환</div><div class="v" id="dbAmount">-</div></div>
+        <div class="compare-card hi"><div class="k">지금 한투 DC 전환</div><div class="v" id="dcAmount">-</div></div>
+      </div>
+
+      <div class="wait-card" id="waitCardConsumer" style="display:none">
+        <div class="lbl">✅ 지금 전환하면 올해 높은 등급 덕분에 추가로</div>
+        <div class="v" id="waitLossConsumer">-</div>
+        <p class="sub" id="waitSubConsumer"></p>
+      </div>
+
+      <div class="chart-card">
+        <p class="chart-title">나이별 예상 적립금 추이</p>
+        <svg class="chart" id="chart" viewBox="0 0 440 260"></svg>
+        <div class="legend">
+          <div class="item"><span class="sw" style="background:#9199AA"></span>임금피크 시 전환</div>
+          <div class="item"><span class="sw" style="background:#C6982E"></span>지금 전환</div>
+          <div class="item"><span class="sw" style="background:#FBE7A3"></span>격차</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <p class="chart-title">임금피크 시작 시점 최종 비교</p>
+        <div class="bar-chart" id="barChart"></div>
+      </div>
+
+      <div class="chart-card">
+        <p class="chart-title">이 차이는 어디서 오는가</p>
+        <div class="mini-grid" id="breakdown"></div>
+      </div>
+
+      <div class="delta-strip"><p id="deltaText">-</p></div>
+    </div>
+  </div>
+
+  <p class="section-title">자주 묻는 질문</p>
+  <div class="faq" id="faqList"></div>
+
+  <p class="disclaimer">본 계산기는 참고용 근사 모델입니다. 등급→상승률 환산(가정치): S 6%·A 4%·B 2.5%·C 1%·D·E 0%. 실제 수치는 상담 시 조정하세요. 기본 전제: DC 예상 운용수익률이 향후 임금상승률보다 높아 장기적으로 DC 전환이 유리하며, 경영평가로 임금이 오른 지금 전환하면 그 상승분까지 확정할 수 있어 더욱 유리합니다. 비교 시점은 임금피크제 도입 나이이며, 그 이후까지 DB를 유지한다는 가정은 두지 않습니다.</p>
+</div>
+
+<script>
+const COMPANIES = [
+  { name: "강원랜드", category: "공기업", grade2025: "C", avg10: 2.8 },
+  { name: "그랜드코리아레저", category: "공기업", grade2025: "C", avg10: 2.8 },
+  { name: "에스알", category: "공기업", grade2025: "D", avg10: 2.6 },
+  { name: "인천국제공항공사", category: "공기업", grade2025: "B", avg10: 3.6 },
+  { name: "제주국제자유도시개발센터", category: "공기업", grade2025: "D", avg10: 3 },
+  { name: "주택도시보증공사", category: "공기업", grade2025: "B", avg10: 2.4 },
+  { name: "한국가스공사", category: "공기업", grade2025: "C", avg10: 3 },
+  { name: "한국가스기술공사", category: "공기업", grade2025: "C", avg10: 3.8 },
+  { name: "한국공항공사", category: "공기업", grade2025: "C", avg10: 3 },
+  { name: "한국광해광업공단", category: "공기업", grade2025: "D", avg10: 2.8 },
+  { name: "한국남동발전", category: "공기업", grade2025: "A", avg10: 4.8 },
+  { name: "한국남부발전", category: "공기업", grade2025: "A", avg10: 4.4 },
+  { name: "한국도로공사", category: "공기업", grade2025: "B", avg10: 4.6 },
+  { name: "한국동서발전", category: "공기업", grade2025: "C", avg10: 4.6 },
+  { name: "한국마사회", category: "공기업", grade2025: "B", avg10: 3 },
+  { name: "한국방송광고진흥공사", category: "공기업", grade2025: "E", avg10: 2.6 },
+  { name: "한국부동산원", category: "공기업", grade2025: "B", avg10: 4 },
+  { name: "한국서부발전", category: "공기업", grade2025: "C", avg10: 3.8 },
+  { name: "한국석유공사", category: "공기업", grade2025: "D", avg10: 3.2 },
+  { name: "한국수력원자력", category: "공기업", grade2025: "A", avg10: 4.6 },
+  { name: "한국수자원공사", category: "공기업", grade2025: "B", avg10: 4.2 },
+  { name: "한국전력공사", category: "공기업", grade2025: "A", avg10: 3.6 },
+  { name: "한국전력기술", category: "공기업", grade2025: "C", avg10: 3.8 },
+  { name: "한국조폐공사", category: "공기업", grade2025: "A", avg10: 4 },
+  { name: "한국중부발전", category: "공기업", grade2025: "B", avg10: 3.8 },
+  { name: "한국지역난방공사", category: "공기업", grade2025: "B", avg10: 4.2 },
+  { name: "한국철도공사", category: "공기업", grade2025: "C", avg10: 1.8 },
+  { name: "한국토지주택공사", category: "공기업", grade2025: "B", avg10: 3.2 },
+  { name: "한전KDN", category: "공기업", grade2025: "A", avg10: 3.6 },
+  { name: "한전KPS", category: "공기업", grade2025: "B", avg10: 4.2 },
+  { name: "해양환경공단", category: "공기업", grade2025: "C", avg10: 4.2 },
+  { name: "건강보험심사평가원", category: "준정부기관", grade2025: "A", avg10: 4.2 },
+  { name: "공무원연금공단", category: "준정부기관", grade2025: "C", avg10: 3.5 },
+  { name: "국가철도공단", category: "준정부기관", grade2025: "C", avg10: 3.5 },
+  { name: "국립공원공단", category: "준정부기관", grade2025: "E", avg10: 4.25 },
+  { name: "국립생태원", category: "준정부기관", grade2025: "C", avg10: 3.25 },
+  { name: "국민건강보험공단", category: "준정부기관", grade2025: "C", avg10: 4.2 },
+  { name: "국민연금공단", category: "준정부기관", grade2025: "A", avg10: 4.2 },
+  { name: "국민체육진흥공단", category: "준정부기관", grade2025: "D", avg10: 3.4 },
+  { name: "국토안전관리원", category: "준정부기관", grade2025: "C", avg10: 2.75 },
+  { name: "근로복지공단", category: "준정부기관", grade2025: "A", avg10: 3.4 },
+  { name: "기술보증기금", category: "준정부기관", grade2025: "C", avg10: 4 },
+  { name: "대한무역투자진흥공사", category: "준정부기관", grade2025: "A", avg10: 4.8 },
+  { name: "소상공인시장진흥공단", category: "준정부기관", grade2025: "B", avg10: 3 },
+  { name: "신용보증기금", category: "준정부기관", grade2025: "C", avg10: 4 },
+  { name: "예금보험공사", category: "준정부기관", grade2025: "A", avg10: 4.2 },
+  { name: "우체국금융개발원", category: "준정부기관", grade2025: "C", avg10: 2.5 },
+  { name: "우체국물류지원단", category: "준정부기관", grade2025: "C", avg10: 2 },
+  { name: "중소벤처기업진흥공단", category: "준정부기관", grade2025: "B", avg10: 4.6 },
+  { name: "축산물품질평가원", category: "준정부기관", grade2025: "C", avg10: 3.4 },
+  { name: "한국가스안전공사", category: "준정부기관", grade2025: "A", avg10: 3.8 },
+  { name: "한국고용정보원", category: "준정부기관", grade2025: "C", avg10: 2.6 },
+  { name: "한국관광공사", category: "준정부기관", grade2025: "B", avg10: 3.4 },
+  { name: "한국교통안전공단", category: "준정부기관", grade2025: "A", avg10: 4.2 },
+  { name: "한국국제협력단", category: "준정부기관", grade2025: "E", avg10: 3.6 },
+  { name: "한국국토정보공사", category: "준정부기관", grade2025: "D", avg10: 2.75 },
+  { name: "한국농수산식품유통공사", category: "준정부기관", grade2025: "B", avg10: 4.2 },
+  { name: "한국농어촌공사", category: "준정부기관", grade2025: "C", avg10: 3.4 },
+  { name: "한국도로교통공단", category: "준정부기관", grade2025: "C", avg10: 4 },
+  { name: "한국무역보험공사", category: "준정부기관", grade2025: "A", avg10: 4.4 },
+  { name: "한국방송통신전파진흥원", category: "준정부기관", grade2025: "C", avg10: 3 },
+  { name: "한국보훈복지의료공단", category: "준정부기관", grade2025: "B", avg10: 2.25 },
+  { name: "한국사회보장정보원", category: "준정부기관", grade2025: "B", avg10: 3.75 },
+  { name: "한국산림복지진흥원", category: "준정부기관", grade2025: "C", avg10: 4 },
+  { name: "한국산업기술기획평가원", category: "준정부기관", grade2025: "B", avg10: 4.5 },
+  { name: "한국산업기술진흥원", category: "준정부기관", grade2025: "A", avg10: 3.6 },
+  { name: "한국산업단지공단", category: "준정부기관", grade2025: "B", avg10: 3.2 },
+  { name: "한국산업안전보건공단", category: "준정부기관", grade2025: "B", avg10: 3.4 },
+  { name: "한국산업인력공단", category: "준정부기관", grade2025: "D", avg10: 2.6 },
+  { name: "한국석유관리원", category: "준정부기관", grade2025: "C", avg10: 3.25 },
+  { name: "한국소비자원", category: "준정부기관", grade2025: "B", avg10: 3 },
+  { name: "한국승강기안전공단", category: "준정부기관", grade2025: "D", avg10: 3 },
+  { name: "한국에너지공단", category: "준정부기관", grade2025: "B", avg10: 4.25 },
+  { name: "한국연구재단", category: "준정부기관", grade2025: "D", avg10: 4.4 },
+  { name: "한국원자력환경공단", category: "준정부기관", grade2025: "B", avg10: 3.25 },
+  { name: "한국인터넷진흥원", category: "준정부기관", grade2025: "D", avg10: 3.75 },
+  { name: "한국자산관리공사", category: "준정부기관", grade2025: "D", avg10: 3.8 },
+  { name: "한국장애인고용공단", category: "준정부기관", grade2025: "C", avg10: 3.75 },
+  { name: "한국장학재단", category: "준정부기관", grade2025: "B", avg10: 4.2 },
+  { name: "한국전기안전공사", category: "준정부기관", grade2025: "B", avg10: 3.6 },
+  { name: "한국전력거래소", category: "준정부기관", grade2025: "B", avg10: 3.4 },
+  { name: "한국주택금융공사", category: "준정부기관", grade2025: "B", avg10: 4 },
+  { name: "한국지능정보사회진흥원", category: "준정부기관", grade2025: "B", avg10: 3.33 },
+  { name: "한국해양교통안전공단", category: "준정부기관", grade2025: "D", avg10: 2.75 },
+  { name: "한국환경공단", category: "준정부기관", grade2025: "B", avg10: 4.6 },
+  { name: "한국환경산업기술원", category: "준정부기관", grade2025: "D", avg10: 3.25 },
+];
+// 실제 5개년 임금 항목 데이터가 확보된 기관 — 슬라이드와 동일한 정밀 계산에 사용
+const REAL_WAGE_DATA = {
+  "건강보험심사평가원": {
+    baseRatio: 0.749,             // 54,926 / 73,335 (2025)
+    otherActualRatio: 0.251,      // (73,335-54,926) / 73,335 — 2025년 실제 '기타' 비중
+    fixedOthersAvgRatio: 0.2566,  // (고정8,233+실적4,581+복리204+성과상여금5,798=18,816) / 73,335 — 4개 항목 각자의 5년 평균 합
+    perfGapRatio: 0.0076          // (경영평가성과급 2,274-1,715.2=558.8) / 73,335 — 성과급만의 당해-평균 격차
+  }
+};
+const GRADE_SCORE = { S:6, A:5, B:4, C:3, D:2, E:1 };
+const SCORE_LETTERS = ['E','D','C','B','A','S'];
+const SCORE_GROWTH_ANCHORS = [ [1,0],[2,0],[3,1],[4,2.5],[5,4],[6,6] ];
+
+function scoreToGrowth(score){
+  const a = SCORE_GROWTH_ANCHORS;
+  if (score<=a[0][0]) return a[0][1];
+  if (score>=a[a.length-1][0]) return a[a.length-1][1];
+  for (let i=0;i<a.length-1;i++){
+    const [s1,g1]=a[i],[s2,g2]=a[i+1];
+    if (score>=s1 && score<=s2){ const t=(score-s1)/(s2-s1); return g1+t*(g2-g1); }
+  }
+  return 2;
+}
+function scoreToLetterLabel(score){
+  const lo = Math.floor(score), hi = Math.ceil(score);
+  const loL = SCORE_LETTERS[lo-1], hiL = SCORE_LETTERS[hi-1];
+  if (lo===hi) return loL;
+  return hiL+"~"+loL;
+}
+
+function populateSelect(){
+  const sel = document.getElementById('company');
+  const groups = {};
+  COMPANIES.forEach(c=>{(groups[c.category]=groups[c.category]||[]).push(c);});
+  Object.keys(groups).forEach(cat=>{
+    const og = document.createElement('optgroup'); og.label = cat;
+    groups[cat].forEach(c=>{ const o=document.createElement('option'); o.value=c.name; o.textContent=c.name; og.appendChild(o); });
+    sel.appendChild(og);
+  });
+  sel.value = "건강보험심사평가원";
+}
+populateSelect();
+
+function formatWon(n){
+  const eok = Math.floor(n/100000000);
+  const man = Math.round((n%100000000)/10000);
+  if (eok>0) return eok+"억 "+man.toLocaleString()+"만원";
+  return man.toLocaleString()+"만원";
+}
+function formatManWon(n){ return Math.round(n/10000).toLocaleString()+"만원"; }
+
+function onCompanyChange(){
+  const name = document.getElementById('company').value;
+  const c = COMPANIES.find(x=>x.name===name);
+  if(!c) return;
+  const curScore = GRADE_SCORE[c.grade2025];
+  window.curScoreVal = curScore;
+  window.avgScoreVal = c.avg10;
+  document.getElementById('mgrGradeCur').textContent = c.grade2025 + "(" + curScore + "점)";
+  document.getElementById('mgrGradeAvg').textContent = c.avg10.toFixed(1) + "점 (약 " + scoreToLetterLabel(c.avg10) + ")";
+  // 기본급 성장률은 등급과 무관한 구조적 추세이므로, 등급이 바뀌어도 값을 재설정하지 않는다.
+  // 최초 1회만 건강보험심사평가원 실측 CAGR(3.47%)을 기본값으로 채운다.
+  if(!document.getElementById('growthInput').value){
+    document.getElementById('growthInput').value = "3.47";
+  }
+  calculate();
+}
+function onAssumpChange(){ calculate(); }
+
+function setTab(tab){
+  document.getElementById('tabManager').classList.toggle('active', tab==='manager');
+  document.getElementById('tabConsumer').classList.toggle('active', tab==='consumer');
+  document.getElementById('tabManager').style.display = (tab==='consumer') ? 'none' : '';
+  document.getElementById('tabConsumer').style.display = (tab==='consumer') ? 'none' : '';
+  document.getElementById('restoreBtn').style.display = (tab==='consumer') ? 'inline-block' : 'none';
+  document.getElementById('panelManager').classList.toggle('show', tab==='manager');
+  document.getElementById('panelConsumer').classList.toggle('show', tab==='consumer');
+}
+
+function calculate(){
+  const age = parseFloat(document.getElementById('age').value);
+  const peakAge = parseFloat(document.getElementById('peakAge').value);
+  const service = parseFloat(document.getElementById('service').value);
+  const wage = parseFloat(document.getElementById('wage').value)*10000;
+  const growth = parseFloat(document.getElementById('growthInput').value)/100;
+  const dcReturn = parseFloat(document.getElementById('dcReturnInput').value)/100;
+  const companyName = document.getElementById('company').value;
+
+  const n = Math.max(peakAge-age, 0);
+  const steps = Math.max(Math.round(n),1);
+
+  document.getElementById('mgrAgeService').textContent = age+"세 · "+service+"년";
+
+  // 급여를 '기본급'과 '나머지 항목(고정·실적수당, 복리후생비, 성과상여금)'으로 분리한다.
+  // 실제 5개년 항목별 데이터가 있는 기관(현재 건강보험심사평가원)은 그 실측 비율을 그대로 쓰고,
+  // 데이터가 없는 기관은 기본급 비중 74.9%(건강보험심사평가원 값)를 대입하고 등급 격차로 프리미엄을 근사한다.
+  const REAL = REAL_WAGE_DATA[companyName];
+  let baseRatio, otherActualRatio, fixedOthersAvgRatio, perfGapRatio;
+  if(REAL){
+    baseRatio = REAL.baseRatio;
+    otherActualRatio = REAL.otherActualRatio;
+    fixedOthersAvgRatio = REAL.fixedOthersAvgRatio; // 4개 항목 각각의 5년 평균을 합한, 진짜 구조적 비율(당해 실제와 다를 수 있음)
+    perfGapRatio = REAL.perfGapRatio; // 경영평가성과급만의 당해-평균 격차 비율
+  } else {
+    baseRatio = 0.749;
+    otherActualRatio = 1-baseRatio;
+    const scoreGap = Math.max((window.curScoreVal||0) - (window.avgScoreVal||0), 0);
+    const WAGE_PREMIUM_PER_POINT = 0.0095; // 건강보험심사평가원 실데이터 기준 보정값(등급 1점당 약 0.95%)
+    const wagePremium = scoreGap*WAGE_PREMIUM_PER_POINT;
+    fixedOthersAvgRatio = otherActualRatio/(1+wagePremium);
+    perfGapRatio = otherActualRatio-fixedOthersAvgRatio;
+  }
+
+  const baseWage = wage*baseRatio;
+  const otherActual = wage*otherActualRatio;                 // 당해 실제(성과급 상승분 포함) — DC 정산액에만 사용
+  const otherAvg = wage*fixedOthersAvgRatio;                  // 구조적 5년 평균 — DB·모든 미래 부담금에 사용
+  const otherAvgForSettlement = otherActual - wage*perfGapRatio; // 경영평가성과급만 평년으로 되돌린 반사실 정산 수준
+
+  // 매년 부담금/DB 트랙: 기본급은 자체 성장률로, 기타항목은 항상 구조적 5년평균(otherAvg)로 고정
+  function yearWage(t){ return baseWage*Math.pow(1+growth,t) + otherAvg; }
+
+  // DB(임금피크 시 전환): 항상 구조적 5년평균 기준 궤적만 사용
+  let dbRunning = (baseWage+otherAvg)*service;
+  const dbPath=[dbRunning], ages=[age];
+  for(let t=1;t<=steps;t++){
+    dbRunning = yearWage(t)*(service+t);
+    dbPath.push(dbRunning); ages.push(age+t);
+  }
+  const dbFinal = dbPath[dbPath.length-1];
+
+  // DC(지금 전환, 실제): 정산액만 오늘의 실제 수준(otherActual 포함), 이후 부담금은 위와 동일한 궤적
+  let dcRunning = (baseWage+otherActual)*service;
+  const dcPath=[dcRunning];
+  for(let t=1;t<=steps;t++){ dcRunning = dcRunning*(1+dcReturn)+yearWage(t); dcPath.push(dcRunning); }
+  const dcFinal = dcPath[dcPath.length-1];
+  const delta = dcFinal-dbFinal;
+
+  // DC(지금 전환, 반사실=경영평가성과급만 평년이었다면): 정산액을 otherAvgForSettlement 기준으로만 교체
+  let dcRunningC = (baseWage+otherAvgForSettlement)*service;
+  for(let t=1;t<=steps;t++){ dcRunningC = dcRunningC*(1+dcReturn)+yearWage(t); }
+  const dcFinalC = dcRunningC;
+
+  const pureEffect = dcFinalC-dbFinal;   // ① 순수 임금상승률·수익률(g vs r) 효과 — DB는 고정, DC만 반사실
+  const gradeEffect = dcFinal-dcFinalC;  // ② 경영평가성과급 효과 — DC끼리, 정산액 수준 차이만
+
+  document.getElementById('dbAmount').textContent = formatWon(dbFinal);
+  document.getElementById('dcAmount').textContent = formatWon(dcFinal);
+  document.getElementById('deltaText').textContent =
+    (delta>=0? "지금 한투 DC로 전환하면 임금피크 시작 시점 기준 약 "+formatWon(delta)+" 더 유리합니다"
+              : "이 가정으로는 임금피크 시작 시 전환이 약 "+formatWon(Math.abs(delta))+" 더 유리합니다");
+
+  // 리스크: '전환을 미루다 다음 평가에서 등급이 평년으로 돌아가면' 사라지는 건 ②(경영평가 프리미엄)뿐 — 기본급 성장률과는 무관
+  const riskLoss = Math.max(gradeEffect,0);
+
+  const rawScoreGap = (window.curScoreVal||0) - (window.avgScoreVal||0);
+  const badge = document.getElementById('gradeStatusBadge');
+  const waitCardM = document.getElementById('waitCardManager');
+  const waitCardC = document.getElementById('waitCardConsumer');
+  if (rawScoreGap > 0) {
+    badge.textContent = "✓ 경영평가 우선순위 대상 (당해 등급이 5년 평균보다 높음)";
+    badge.style.background = "#FBE7A3";
+    badge.style.color = "#8A6512";
+    waitCardM.style.display = "flex";
+    waitCardC.style.display = "flex";
+    document.getElementById('waitLossManager').textContent = "+"+formatWon(riskLoss);
+    document.getElementById('waitSubManager').textContent = "올해 높은 등급이 반영된 지금 정산해야 임금피크 시점(만 "+peakAge+"세) 기준 이만큼 더 받을 수 있습니다. 내년(평년 등급)으로 미루면 사라질 수 있는 금액입니다.";
+    document.getElementById('waitLossConsumer').textContent = "+"+formatWon(riskLoss);
+    document.getElementById('waitSubConsumer').textContent = "임금피크 시점(만 "+peakAge+"세) 기준, 지금 전환해야만 받을 수 있는 금액입니다.";
+  } else {
+    badge.textContent = "경영평가 이득 없음 (당해 등급이 5년 평균 이하)";
+    badge.style.background = "#EDEFF6";
+    badge.style.color = "#5B6478";
+    waitCardM.style.display = "none";
+    waitCardC.style.display = "none";
+  }
+
+  if (rawScoreGap > 0) {
+    document.getElementById('scriptText').innerHTML =
+      "<p>"+companyName+"의 5개년 평균 등급 대비 당해(2025) 등급이 높은 상태입니다.</p>" +
+      "<p>경영평가로 오른 성과급이 정산액에 반영되는 <b>지금이 전환의 최적 시기</b>이며, 임금피크 시작 시점(만 "+peakAge+"세) 기준으로 "+
+      (delta>=0? "약 "+formatWon(delta)+" 더 받으실 것으로 계산됩니다." : "약 "+formatWon(Math.abs(delta))+" 차이가 나는 것으로 계산됩니다.")+"</p>" +
+      "<p>이 중 순수 재테크 효과(임금상승률·수익률 차이)는 <b>"+formatWon(pureEffect)+"</b>이고, 나머지 <b>"+formatWon(riskLoss)+"</b>은 이번 경영평가 덕분입니다.</p>" +
+      "<p>전환을 미루다 다음 평가에서 등급이 평년 수준으로 돌아가면 이 "+formatWon(riskLoss)+" 프리미엄은 사라질 수 있어, 지금 확정해두는 것이 유리합니다.</p>";
+  } else {
+    document.getElementById('scriptText').innerHTML =
+      "<p>"+companyName+"의 당해(2025) 등급은 5개년 평균보다 높지 않습니다. <b>경영평가 관점의 전환 유인은 없습니다.</b></p>" +
+      "<p>다만 DC 전환 자체는 임금상승률과 수익률의 차이(순수 재테크 효과)만으로도 "+
+      (delta>=0? "임금피크 시작 시점(만 "+peakAge+"세) 기준 약 "+formatWon(delta)+" 유리한 것으로 계산됩니다." : "지금은 오히려 DB 유지가 약 "+formatWon(Math.abs(delta))+" 유리한 것으로 계산됩니다.")+"</p>" +
+      "<p>이 경우 상담 시 경영평가를 근거로 제시하지 마시고, "+(delta>=0? "재테크 관점의 이득만 안내하시는 것이 정확합니다." : "지금은 전환을 서두를 근거가 약하다는 점을 안내하시는 것이 정확합니다.")+"</p>";
+  }
+
+  document.getElementById('assumpSummary').innerHTML =
+    "가정: 기본급은 자체 5년 평균 성장률<b>("+(growth*100).toFixed(1)+"%)</b>을 따라 상승, 나머지 항목(고정·실적수당·복리후생비·성과상여금)은 각각 5년 평균 수준으로 고정 · DC 운용수익률 <b>"+(dcReturn*100).toFixed(2)+"%</b> · 임금피크 시작 <b>만 "+peakAge+"세</b> · 현재 나이 <b>만 "+age+"세</b>(근속 "+service+"년)";
+
+  drawChart(dbPath, dcPath, ages);
+  drawBars(dbFinal, dcFinal);
+  drawBreakdown(pureEffect, gradeEffect);
+  const startTotal = baseWage+otherAvg;
+  const endTotal = yearWage(steps);
+  const effectiveGrowth = Math.pow(endTotal/startTotal, 1/steps)-1;
+
+  updateFaq({companyName, age, service, peakAge, growth: growth*100, effectiveGrowth: effectiveGrowth*100, dcReturnPct: dcReturn*100, delta, dbFinal, dcFinal, pureEffect, gradeEffect});
+}
+
+function drawBreakdown(pureEffect, gradeEffect){
+  const el = document.getElementById('breakdown');
+  if(!el) return;
+  const total = pureEffect+gradeEffect;
+  const pureShare = total!==0 ? Math.round(pureEffect/total*100) : 0;
+  const gradeShare = total!==0 ? 100-pureShare : 0;
+  el.innerHTML =
+    '<div class="mini"><div class="k">① 임금상승률·수익률 차이 (DC(평년 정산) − DB)</div><div class="v">'+formatWon(pureEffect)+' <span style="font-size:12px;color:var(--ink-faint);font-weight:500">('+pureShare+'%)</span></div></div>'+
+    '<div class="mini"><div class="k">② 경영평가성과급 효과 (DC(실제 정산) − DC(평년 정산))</div><div class="v">'+formatWon(gradeEffect)+' <span style="font-size:12px;color:var(--ink-faint);font-weight:500">('+gradeShare+'%)</span></div></div>';
+}
+
+
+function drawChart(dbPath, dcPath, ages){
+  const svg = document.getElementById('chart');
+  svg.innerHTML='';
+  const W=440,H=260, padL=54, padR=16, padT=16, padB=34;
+  const allVals = [...dbPath,...dcPath];
+  const rawMin = Math.min(...allVals), rawMax = Math.max(...allVals);
+  const span = rawMax-rawMin;
+  const minVal = Math.max(rawMin - span*0.06, 0);
+  const maxVal = rawMax + span*0.1;
+  const n = dbPath.length;
+  const xAt = i => padL + (i/(n-1))*(W-padL-padR);
+  const yAt = v => H-padB - ((v-minVal)/(maxVal-minVal))*(H-padT-padB);
+  const ns="http://www.w3.org/2000/svg";
+
+  // y gridlines + labels
+  const ticks = 4;
+  for(let k=0;k<=ticks;k++){
+    const v = minVal + (maxVal-minVal)*k/ticks;
+    const y = yAt(v);
+    const gl = document.createElementNS(ns,"line");
+    gl.setAttribute("x1",padL); gl.setAttribute("x2",W-padR); gl.setAttribute("y1",y); gl.setAttribute("y2",y);
+    gl.setAttribute("stroke","#EEF0F6"); gl.setAttribute("stroke-width","1");
+    svg.appendChild(gl);
+    const lbl = document.createElementNS(ns,"text");
+    lbl.setAttribute("x",padL-8); lbl.setAttribute("y",y+4); lbl.setAttribute("text-anchor","end");
+    lbl.setAttribute("font-size","10"); lbl.setAttribute("fill","#9199AA");
+    lbl.textContent = formatManWon(v);
+    svg.appendChild(lbl);
+  }
+  // x-axis
+  const axis = document.createElementNS(ns,"line");
+  axis.setAttribute("x1",padL); axis.setAttribute("x2",W-padR); axis.setAttribute("y1",H-padB); axis.setAttribute("y2",H-padB);
+  axis.setAttribute("stroke","#DCD6C5"); axis.setAttribute("stroke-width","1");
+  svg.appendChild(axis);
+  const xTickEvery = Math.max(Math.round(n/6),1);
+  ages.forEach((a,i)=>{
+    if(i%xTickEvery===0 || i===ages.length-1){
+      const t = document.createElementNS(ns,"text");
+      t.setAttribute("x",xAt(i)); t.setAttribute("y",H-padB+18); t.setAttribute("text-anchor","middle");
+      t.setAttribute("font-size","10"); t.setAttribute("fill","#9199AA");
+      t.textContent = a+"세";
+      svg.appendChild(t);
+    }
+  });
+
+  // gap area
+  let areaPath = "M"+xAt(0)+","+yAt(dbPath[0]);
+  for(let i=0;i<n;i++) areaPath += " L"+xAt(i)+","+yAt(dcPath[i]);
+  for(let i=n-1;i>=0;i--) areaPath += " L"+xAt(i)+","+yAt(dbPath[i]);
+  areaPath += " Z";
+  const area = document.createElementNS(ns,"path");
+  area.setAttribute("d",areaPath); area.setAttribute("fill","#FBE7A3"); area.setAttribute("opacity","0.55");
+  svg.appendChild(area);
+
+  const pathFor = arr => arr.map((v,i)=>(i===0?"M":"L")+xAt(i).toFixed(1)+","+yAt(v).toFixed(1)).join(" ");
+  const dbLine=document.createElementNS(ns,"path");dbLine.setAttribute("d",pathFor(dbPath));
+  dbLine.setAttribute("fill","none");dbLine.setAttribute("stroke","#9199AA");dbLine.setAttribute("stroke-width","3");svg.appendChild(dbLine);
+  const dcLine=document.createElementNS(ns,"path");dcLine.setAttribute("d",pathFor(dcPath));
+  dcLine.setAttribute("fill","none");dcLine.setAttribute("stroke","#C6982E");dcLine.setAttribute("stroke-width","3");svg.appendChild(dcLine);
+
+  [dbPath,dcPath].forEach((arr,idx)=>{
+    arr.forEach((v,i)=>{
+      const dot=document.createElementNS(ns,"circle");
+      dot.setAttribute("cx",xAt(i));dot.setAttribute("cy",yAt(v));dot.setAttribute("r", i===arr.length-1?4:2.5);
+      dot.setAttribute("fill", idx===0?"#9199AA":"#C6982E");svg.appendChild(dot);
+    });
+  });
+
+  // 마지막 지점 격차를 숫자로 직접 표시
+  const lastI = n-1;
+  const yDb = yAt(dbPath[lastI]), yDc = yAt(dcPath[lastI]);
+  const gapVal = dcPath[lastI]-dbPath[lastI];
+  const bracketX = W-padR+2;
+  const bx = xAt(lastI);
+  const bracket = document.createElementNS(ns,"path");
+  bracket.setAttribute("d","M"+bx+","+yDb+" L"+(bx+8)+","+yDb+" L"+(bx+8)+","+yDc+" L"+bx+","+yDc);
+  bracket.setAttribute("fill","none"); bracket.setAttribute("stroke","#8A6512"); bracket.setAttribute("stroke-width","1.5");
+  svg.appendChild(bracket);
+  const gapLabel = document.createElementNS(ns,"text");
+  gapLabel.setAttribute("x", Math.min(bx+13, W-4)); gapLabel.setAttribute("y", (yDb+yDc)/2+4);
+  gapLabel.setAttribute("font-size","11"); gapLabel.setAttribute("font-weight","700"); gapLabel.setAttribute("fill","#8A6512");
+  gapLabel.textContent = "+"+formatManWon(gapVal);
+  svg.appendChild(gapLabel);
+}
+
+function drawGapChart(dbPath, dcPath, ages){
+  const svg = document.getElementById('gapChart');
+  if(!svg) return;
+  svg.innerHTML='';
+  const gaps = dbPath.map((v,i)=>dcPath[i]-v);
+  const W=440,H=140, padL=54, padR=16, padT=14, padB=30;
+  const minG = Math.min(...gaps,0), maxG = Math.max(...gaps)*1.15;
+  const n = gaps.length;
+  const xAt = i => padL + (i/(n-1))*(W-padL-padR);
+  const yAt = v => H-padB - ((v-minG)/(maxG-minG))*(H-padT-padB);
+  const ns="http://www.w3.org/2000/svg";
+
+  const ticks=3;
+  for(let k=0;k<=ticks;k++){
+    const v = minG+(maxG-minG)*k/ticks;
+    const y = yAt(v);
+    const gl=document.createElementNS(ns,"line");
+    gl.setAttribute("x1",padL); gl.setAttribute("x2",W-padR); gl.setAttribute("y1",y); gl.setAttribute("y2",y);
+    gl.setAttribute("stroke","#EEF0F6"); gl.setAttribute("stroke-width","1"); svg.appendChild(gl);
+    const lbl=document.createElementNS(ns,"text");
+    lbl.setAttribute("x",padL-8); lbl.setAttribute("y",y+4); lbl.setAttribute("text-anchor","end");
+    lbl.setAttribute("font-size","10"); lbl.setAttribute("fill","#9199AA");
+    lbl.textContent = formatManWon(v); svg.appendChild(lbl);
+  }
+  const axis=document.createElementNS(ns,"line");
+  axis.setAttribute("x1",padL); axis.setAttribute("x2",W-padR); axis.setAttribute("y1",yAt(0)); axis.setAttribute("y2",yAt(0));
+  axis.setAttribute("stroke","#DCD6C5"); axis.setAttribute("stroke-width","1"); svg.appendChild(axis);
+  const xTickEvery = Math.max(Math.round(n/6),1);
+  ages.forEach((a,i)=>{
+    if(i%xTickEvery===0 || i===ages.length-1){
+      const t=document.createElementNS(ns,"text");
+      t.setAttribute("x",xAt(i)); t.setAttribute("y",H-padB+16); t.setAttribute("text-anchor","middle");
+      t.setAttribute("font-size","10"); t.setAttribute("fill","#9199AA"); t.textContent=a+"세"; svg.appendChild(t);
+    }
+  });
+
+  let areaPath = "M"+xAt(0)+","+yAt(0);
+  gaps.forEach((g,i)=>{ areaPath += " L"+xAt(i)+","+yAt(g); });
+  areaPath += " L"+xAt(n-1)+","+yAt(0)+" Z";
+  const area=document.createElementNS(ns,"path");
+  area.setAttribute("d",areaPath); area.setAttribute("fill","#FBE7A3"); area.setAttribute("opacity","0.7");
+  svg.appendChild(area);
+
+  const linePath = gaps.map((g,i)=>(i===0?"M":"L")+xAt(i).toFixed(1)+","+yAt(g).toFixed(1)).join(" ");
+  const line=document.createElementNS(ns,"path");
+  line.setAttribute("d",linePath); line.setAttribute("fill","none"); line.setAttribute("stroke","#C6982E"); line.setAttribute("stroke-width",2.5);
+  svg.appendChild(line);
+
+  const lastG = gaps[gaps.length-1];
+  const lbl=document.createElementNS(ns,"text");
+  lbl.setAttribute("x", xAt(n-1)-4); lbl.setAttribute("y", yAt(lastG)-8); lbl.setAttribute("text-anchor","end");
+  lbl.setAttribute("font-size","12"); lbl.setAttribute("font-weight","800"); lbl.setAttribute("fill","#8A6512");
+  lbl.textContent = "+"+formatManWon(lastG); svg.appendChild(lbl);
+}
+
+function drawBars(dbFinal, dcFinal){
+  const el = document.getElementById('barChart');
+  el.innerHTML='';
+  const max = Math.max(dbFinal,dcFinal);
+  const rows = [
+    {label:"임금피크 시 전환", val:dbFinal, color:"#9199AA"},
+    {label:"지금 전환", val:dcFinal, color:"#C6982E"}
+  ];
+  rows.forEach(r=>{
+    const row = document.createElement('div'); row.className='bar-row';
+    const lbl = document.createElement('div'); lbl.className='bar-label'; lbl.textContent=r.label;
+    const track = document.createElement('div'); track.className='bar-track';
+    const fill = document.createElement('div'); fill.className='bar-fill';
+    fill.style.width = Math.max((r.val/max*100),8)+"%";
+    fill.style.background = r.color;
+    const span = document.createElement('span'); span.textContent = formatWon(r.val);
+    fill.appendChild(span);
+    track.appendChild(fill);
+    row.appendChild(lbl); row.appendChild(track);
+    el.appendChild(row);
+  });
+}
+
+function updateFaq(d){
+  const faqs = [
+    {
+      q: "기본적으로 DC 전환이 유리한 이유는 무엇인가요?",
+      a: "DC 예상 운용수익률("+d.dcReturnPct.toFixed(2)+"%)이 향후 전체 임금상승률("+d.effectiveGrowth.toFixed(2)+"%)보다 높기 때문입니다. 기본급 자체는 "+d.growth.toFixed(1)+"%씩 오르지만, 나머지 항목(약 25%)은 5년 평균 수준에서 그대로 유지된다고 가정하기 때문에 전체 임금 기준 실질 상승률은 이보다 낮습니다. 시간이 지날수록 DC 적립금이 복리로 불어나는 속도가 DB 퇴직급여가 느는 속도보다 빨라, 장기적으로는 DC가 유리한 구조입니다."
+    },
+    {
+      q: "왜 임금피크 시작 시점과 비교하나요?",
+      a: "임금피크제가 도입되면 늦어도 그 시점에는 DC로 전환하게 되어, 정년까지 DB를 유지하는 경우는 없다고 전제합니다. 그래서 실제 선택은 'DC로 넘어갈지 말지'가 아니라 '지금 넘어갈지, 임금피크 시작 시점(만 "+d.peakAge+"세)에 넘어갈지'의 타이밍 문제입니다."
+    },
+    {
+      q: "그럼 왜 하필 지금(2025년) 전환해야 하나요?",
+      a: d.companyName+"의 당해(2025) 등급이 5년 평균보다 높은 상태입니다. 지금 전환하면 경영평가로 오른 임금 수준 그대로 정산액을 확정해 임금피크 시작 시점까지 운용할 수 있지만, 전환을 미루다 다음 평가에서 등급이 평균 수준으로 낮아지면 그 상승분이 사라질 수 있습니다. 즉 'DC가 유리하다'는 기본 전제에 더해, '지금이 특히 더 유리한 시점'이라는 근거가 하나 더 붙는 것입니다."
+    },
+    {
+      q: "이 차이가 단순히 일찍 전환해서 생긴 건가요, 경영평가 덕분인가요?",
+      a: "둘 다입니다. 전체 격차 중 "+formatWon(d.pureEffect)+"은 DC 운용수익률이 임금상승률보다 높다는 순수한 재테크 효과이고, 나머지 "+formatWon(d.gradeEffect)+"은 올해 경영평가 등급이 5년 평균보다 높아서 생기는 효과입니다. 후자가 바로 '지금이 유독 더 유리한 이유'입니다."
+    },
+    {
+      q: "5년 평균 등급은 어떻게 계산되나요?",
+      a: "등급을 점수(S=6점~E=1점)로 환산해 당해(2025)를 제외한 직전 5개년(2020~2024)의 평균을 낸 값입니다. "+d.companyName+"은 현재 이 방식으로 계산돼 있으며, 점수를 다시 알파벳으로 환산해 함께 표기합니다."
+    },
+    {
+      q: "이 계산은 얼마나 정확한가요?",
+      a: "근로자퇴직급여보장법상 평균임금 기준을 단순화한 참고용 모델입니다. 세전·수수료 미반영, 등급→상승률 환산은 가정치이며, 실제 전환 시 정확한 금액은 개별 취업규칙과 세부 산식에 따라 달라질 수 있습니다."
+    }
+  ];
+  const list = document.getElementById('faqList');
+  list.innerHTML = '';
+  faqs.forEach(f=>{
+    const item = document.createElement('div'); item.className='faq-item';
+    const q = document.createElement('p'); q.className='faq-q'; q.textContent = 'Q. '+f.q;
+    const a = document.createElement('p'); a.className='faq-a'; a.textContent = 'A. '+f.a;
+    item.appendChild(q); item.appendChild(a); list.appendChild(item);
+  });
+}
+
+onCompanyChange();
+</script>
+</body>
+</html>
